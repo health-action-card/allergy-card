@@ -1,6 +1,6 @@
 // 알레르기 예방 약속 카드 - Service Worker
 // 내용을 고친 뒤 배포할 때는 버전 숫자를 올려 주세요 (v1 → v2)
-const CACHE_NAME = "allergy-card-v6";
+const CACHE_NAME = "allergy-card-v7";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
