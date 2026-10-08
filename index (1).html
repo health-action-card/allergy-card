@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>알레르기 예방 약속 카드</title>
+
+<!-- ===== PWA 설정 ===== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7FDCC4">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="알레르기 약속">
+
+<!-- ===== 글꼴 (주아: 제목·버튼·수칙·본문 모두) - 바꾸려면 아래 :root 의 --font-title, --font-body 를 고쳐요 ===== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+<!-- ===== 카드 이미지 저장 라이브러리 ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+/* =========================================================
+   1. 기본 색상 (파스텔 톤) - 여기 값만 바꾸면 전체 색이 바뀌어요
+   ========================================================= */
+:root{
+  --mint:#C9F2E6;   --mint-d:#3FBF9C;
+  --yellow:#FFF3B8; --yellow-d:#E5A800;
+  --sky:#D4ECFF;    --sky-d:#3E9BE0;
+  --pink:#FFDDE6;   --pink-d:#F06A90;
+  --ink:#3A4852;    --ink-soft:#6E7D88;
+  --bg:#F4FBFF;     --white:#FFFFFF;
+  --line:#E3EEF3;
+  --radius:22px;
+  --shadow:0 6px 20px rgba(62,155,224,.12);
+
+  /* 글씨체: 모두 동글동글하고 또렷한 '주아' */
+  --font-title:'Jua','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --font-body:'Jua','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font-body);font-weight:400;font-size:17px;font-synthesis:none;letter-spacing:.2px;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 10% 0%, #E1FAF2 0, transparent 40%),
+    radial-gradient(circle at 100% 20%, #FFF8D6 0, transparent 35%),
+    var(--bg);
+  min-height:100vh;
+  line-height:1.55;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+h1,h2,h3,.jua{font-family:var(--font-title);font-weight:400}
+input,select,textarea{font-family:inherit}
+button{font-family:inherit;cursor:pointer}
+.hidden{display:none !important}
+
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 60px}
+
+/* ===== 상단 타이틀 ===== */
+.hero{text-align:center;padding:18px 8px 6px}
+.hero .bubble{font-size:46px;line-height:1;animation:float 3s ease-in-out infinite}
+.hero h1{font-size:clamp(26px,6vw,36px);margin:8px 0 4px;color:#2E9C80}
+.hero p{margin:0;color:var(--ink-soft);font-size:16px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.install-btn{
+  margin:12px auto 0;display:inline-flex;align-items:center;gap:6px;
+  border:2px dashed var(--sky-d);background:var(--white);color:var(--sky-d);
+  padding:8px 16px;border-radius:999px;font-size:15px;
+}
+
+/* ===== 단계 패널 ===== */
+.panel{
+  background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:20px;margin-top:18px;
+}
+.step-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.step-num{
+  flex:0 0 auto;width:36px;height:36px;border-radius:50%;
+  display:grid;place-items:center;font-family:var(--font-title);font-weight:400;font-size:19px;color:#fff;
+  background:var(--mint-d);
+}
+.step-head h2{margin:0;font-size:22px}
+.step-head small{display:block;color:var(--ink-soft);font-size:14px}
+
+/* ===== 1단계: 이름 ===== */
+.name-row{display:flex;gap:10px}
+.name-input{
+  flex:1;min-width:0;font-size:22px;font-family:var(--font-title);font-weight:400;
+  padding:14px 18px;border-radius:18px;border:3px solid var(--mint);
+  outline:none;color:var(--ink);background:#FBFFFD;transition:border-color .2s;
+}
+.name-input:focus{border-color:var(--mint-d)}
+.name-preview{
+  margin-top:12px;padding:12px 16px;border-radius:16px;background:var(--yellow);
+  font-size:16px;min-height:48px;word-break:keep-all;
+}
+.name-preview b{font-family:var(--font-title);font-weight:400;font-size:18px;color:#B77E00}
+
+/* ===== 2단계: 아코디언 카테고리 ===== */
+.group{border-radius:20px;margin-bottom:12px;overflow:hidden;border:3px solid var(--c)}
+.theme-mint{--c:var(--mint);--cd:var(--mint-d)}
+.theme-yellow{--c:var(--yellow);--cd:var(--yellow-d)}
+.theme-sky{--c:var(--sky);--cd:var(--sky-d)}
+.theme-pink{--c:var(--pink);--cd:var(--pink-d)}
+
+.group summary{
+  list-style:none;display:flex;align-items:center;gap:10px;
+  padding:14px 16px;background:var(--c);cursor:pointer;user-select:none;min-height:58px;
+}
+.group summary::-webkit-details-marker{display:none}
+.g-emoji{font-size:26px}
+.g-title{font-family:var(--font-title);font-weight:400;font-size:21px;flex:1}
+.g-count{
+  font-size:14px;background:#fff;color:var(--cd);border-radius:999px;padding:3px 10px;
+  font-weight:700;
+}
+.g-count:empty{display:none}
+.g-arrow{font-size:20px;transition:transform .25s;color:var(--cd)}
+.group[open] .g-arrow{transform:rotate(180deg)}
+.g-body{padding:10px;display:grid;gap:8px;background:#fff}
+
+/* 수칙 한 줄 (큰 체크박스) */
+.rule{
+  position:relative;display:flex;align-items:flex-start;gap:12px;
+  padding:13px 14px;border-radius:16px;background:#FAFCFD;border:2px solid var(--line);
+  cursor:pointer;transition:all .15s;font-size:16.5px;
+}
+.rule:active{transform:scale(.985)}
+.rule input{position:absolute;opacity:0;pointer-events:none}
+.rule .check{
+  flex:0 0 auto;width:30px;height:30px;border-radius:10px;border:3px solid #C8D6DE;
+  background:#fff;display:grid;place-items:center;color:#fff;font-size:18px;font-weight:900;
+  transition:all .15s;margin-top:-1px;
+}
+.rule.on{background:color-mix(in srgb, var(--c, var(--mint)) 45%, #fff);border-color:var(--cd, var(--mint-d))}
+.rule.on .check{background:var(--cd, var(--mint-d));border-color:var(--cd, var(--mint-d))}
+.rule.on .check::after{content:'✓'}
+.rule input:focus-visible + .check{outline:3px solid var(--sky-d);outline-offset:2px}
+.rule .text{flex:1;word-break:keep-all}
+.rule .del{
+  flex:0 0 auto;border:none;background:#fff;color:var(--pink-d);width:34px;height:34px;
+  border-radius:50%;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+/* 나만의 수칙 */
+.custom-box{border-radius:20px;border:3px dashed var(--pink-d);padding:14px;background:#FFF8FA}
+.custom-box h3{margin:0 0 10px;font-size:20px;color:var(--pink-d)}
+.custom-row{display:flex;gap:8px}
+.custom-row input{
+  flex:1;min-width:0;font-size:16.5px;padding:13px 14px;border-radius:16px;
+  border:2px solid var(--pink);outline:none;font-family:inherit;color:var(--ink);
+}
+.custom-row input:focus{border-color:var(--pink-d)}
+.custom-list{display:grid;gap:8px;margin-top:10px}
+.custom-list:empty{display:none}
+
+/* ===== 큰 버튼 ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:999px;padding:15px 26px;min-height:56px;
+  font-family:var(--font-title);font-weight:400;font-size:20px;color:#fff;
+  background:var(--mint-d);box-shadow:0 5px 0 rgba(0,0,0,.12);
+  transition:transform .1s, box-shadow .1s, opacity .2s;
+}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.12)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.small{font-size:17px;padding:10px 18px;min-height:50px;white-space:nowrap}
+.btn.pink{background:var(--pink-d)}
+.btn.sky{background:var(--sky-d)}
+.btn.yellow{background:var(--yellow-d)}
+.btn.ghost{background:#fff;color:var(--ink-soft);border:2px solid var(--line);box-shadow:none}
+.btn.block{width:100%}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn-row .btn{flex:1 1 200px}
+
+.make-bar{
+  position:sticky;bottom:12px;z-index:5;margin-top:16px;
+  display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.92);
+  padding:10px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.12);
+}
+.make-bar .count{padding-left:12px;font-size:15px;color:var(--ink-soft);white-space:nowrap}
+.make-bar .count b{font-family:var(--font-title);font-weight:400;font-size:22px;color:var(--mint-d)}
+.make-bar .btn{flex:1}
+
+/* =========================================================
+   3단계: 행동수칙 카드 (이 부분이 이미지로 저장돼요)
+   - 디자인 3종: 히어로 카드 / 지킴이 자격증 / 파스텔 카드
+   ========================================================= */
+.card-stage{display:flex;justify-content:center;padding:6px 0}
+.promise-card{width:100%;max-width:440px;position:relative}
+.promise-card.capturing .holo{display:none}
+
+/* 디자인·수호 친구 고르기 */
+.pick-title{font-family:var(--font-title);font-weight:400;font-size:17px;color:var(--ink-soft);margin:2px 0 8px}
+.design-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.design-pick button{
+  border:3px solid var(--line);background:#fff;border-radius:18px;padding:10px 4px;min-height:84px;
+  font-family:var(--font-title);font-weight:400;font-size:16px;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:all .15s;word-break:keep-all;line-height:1.25;
+}
+.design-pick button .ico{font-size:28px;line-height:1.1}
+.design-pick button small{font-family:var(--font-body);font-size:11.5px;color:var(--ink-soft)}
+.design-pick button.on{border-color:var(--sky-d);background:var(--sky);transform:translateY(-2px)}
+.mascot-pick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.mascot-pick button{width:50px;height:50px;border-radius:50%;border:3px solid var(--line);background:#fff;font-size:27px;line-height:1;padding:0}
+.mascot-pick button.on{border-color:var(--pink-d);background:var(--pink);transform:scale(1.08)}
+
+/* ---------- ① 히어로 카드 (수집 카드 스타일) ---------- */
+.d-hero{
+  padding:9px;border-radius:26px;overflow:hidden;
+  background:linear-gradient(135deg,#7FDCC4 0%,#8EC5FF 25%,#C9A8FF 50%,#FFB3C7 75%,#FFE08A 100%);
+  box-shadow:0 12px 30px rgba(110,90,200,.28);
+}
+.d-hero .holo{
+  position:absolute;inset:0;pointer-events:none;border-radius:26px;z-index:3;
+  background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.5) 47%,transparent 60%);
+  background-size:260% 100%;animation:holo 4.5s linear infinite;
+}
+@keyframes holo{from{background-position:130% 0}to{background-position:-130% 0}}
+.h-in{background:linear-gradient(180deg,#FFFDF6,#FFF4DA);border-radius:18px;padding:11px 12px 10px;position:relative}
+.h-top{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding:0 2px 8px}
+.h-stage{display:inline-block;font-family:var(--font-title);font-weight:400;font-size:11.5px;background:#3A4852;color:#fff;border-radius:6px;padding:1px 7px;margin-bottom:3px}
+.h-name{font-family:var(--font-title);font-weight:400;font-size:30px;line-height:1.05;color:#2B3A44}
+.h-hp{font-family:var(--font-title);font-weight:400;text-align:right;white-space:nowrap;color:#E2506F;font-size:14px;line-height:1}
+.h-hp b{font-weight:400;font-size:32px;margin-left:2px}
+.h-art{
+  position:relative;height:178px;border-radius:12px;border:4px solid #fff;box-shadow:0 0 0 2px #E8D7A8;overflow:hidden;
+  background:radial-gradient(circle at 50% 62%,#FFFFFF 0,#E6FBF3 32%,#CFE8FF 66%,#E4D6FF 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.h-art .ring{position:absolute;width:150px;height:150px;border-radius:50%;border:10px solid rgba(255,255,255,.75)}
+.h-art .mascot{font-size:98px;line-height:1;position:relative;text-shadow:0 8px 0 rgba(0,0,0,.08)}
+.h-art .shield{position:absolute;font-size:34px;right:calc(50% - 76px);bottom:22px}
+.h-art .sp{position:absolute;font-size:20px}
+.h-art .type{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.92);border-radius:999px;padding:2px 10px;font-family:var(--font-title);font-weight:400;font-size:13.5px;color:var(--mint-d)}
+.h-art .rarity{position:absolute;right:8px;top:6px;color:#F5B400;font-size:17px;letter-spacing:1px;text-shadow:0 1px 0 #fff}
+.h-strip{
+  margin:9px 0 6px;text-align:center;font-family:var(--font-title);font-weight:400;font-size:17px;color:#fff;line-height:1.3;
+  background:linear-gradient(90deg,#3FBF9C,#3E9BE0);border-radius:999px;padding:6px 12px;word-break:keep-all;
+  text-shadow:0 1px 0 rgba(0,0,0,.12);
+}
+.h-moves{list-style:none;margin:0;padding:0}
+.h-move{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1.5px solid #EEE0BC;font-size:14.5px;line-height:1.4;word-break:keep-all}
+.h-move:last-child{border-bottom:none}
+.h-move .ic{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--c);font-size:15px}
+.h-move .tx{flex:1}
+.h-move .tx em{font-style:normal;font-family:var(--font-title);font-weight:400;color:var(--pink-d);margin-right:3px}
+.h-move .pw{flex:0 0 auto;font-family:var(--font-title);font-weight:400;font-size:21px;color:#2B3A44;min-width:38px;text-align:right}
+.h-info{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;text-align:center;font-size:12.5px}
+.h-info div{background:rgba(255,255,255,.8);border-radius:10px;padding:4px 2px;word-break:keep-all}
+.h-info b{display:block;font-family:var(--font-title);font-weight:400;font-size:12px;color:var(--ink-soft)}
+.h-flavor{margin-top:8px;font-size:12.5px;line-height:1.5;color:#6E5E3A;border:1.5px solid #E8D7A8;border-radius:10px;padding:6px 9px;background:rgba(255,255,255,.6);word-break:keep-all}
+.h-foot{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding:0 2px;font-size:11.5px;color:var(--ink-soft)}
+.h-foot .sig{font-family:var(--font-title);font-weight:400;font-size:14.5px;color:var(--ink)}
+
+/* ---------- ② 지킴이 자격증 ---------- */
+.d-license{border-radius:22px;background:#fff;border:3px solid #BFE3F5;box-shadow:0 10px 28px rgba(62,155,224,.22);overflow:hidden}
+.l-head{background:linear-gradient(90deg,#8EC5FF,#7FDCC4);color:#fff;text-align:center;padding:14px 12px 12px;position:relative}
+.l-head small{display:block;font-family:var(--font-title);font-weight:400;font-size:12px;letter-spacing:4px;opacity:.95}
+.l-head h3{margin:3px 0 0;font-size:23px;line-height:1.3;word-break:keep-all;text-shadow:0 2px 0 rgba(0,0,0,.1)}
+.l-body{padding:14px 16px 14px;background:repeating-linear-gradient(45deg,#FCFEFF 0 10px,#F3F9FD 10px 20px)}
+.l-id{display:flex;gap:12px}
+.l-photo{flex:0 0 96px;height:120px;border-radius:14px;background:linear-gradient(180deg,#FFF3B8,#FFDDE6);display:grid;place-items:center;font-size:60px;border:3px solid #fff;box-shadow:0 0 0 2px #E3EEF3}
+.l-fields{flex:1;min-width:0;display:grid;gap:3px;align-content:center;font-size:14.5px}
+.l-fields div{display:flex;align-items:baseline;gap:6px;border-bottom:1.5px dashed #DCE8EE;padding:3px 0}
+.l-fields span{flex:0 0 52px;color:var(--ink-soft);font-size:12.5px}
+.l-fields b{font-family:var(--font-title);font-weight:400;font-size:16px;word-break:keep-all}
+.l-fields .stars{color:#F5B400;letter-spacing:1px}
+.l-sec{margin:14px 0 6px;font-family:var(--font-title);font-weight:400;font-size:16px;color:var(--sky-d)}
+.l-list{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.l-list li{display:flex;gap:8px;align-items:flex-start;font-size:14.5px;line-height:1.4;background:#fff;border-radius:12px;padding:7px 10px;border:2px solid var(--c);word-break:keep-all}
+.l-list .ck{flex:0 0 auto;font-family:var(--font-title);font-weight:400;color:var(--cd)}
+.l-oath{margin-top:12px;font-size:13.5px;line-height:1.55;text-align:center;word-break:keep-all}
+.l-sign{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.l-sign .who{font-size:12.5px;color:var(--ink-soft);line-height:1.6}
+.l-sign .who b{font-family:var(--font-title);font-weight:400;font-size:17px;color:var(--ink)}
+.l-stamp{width:76px;height:76px;border-radius:50%;border:3px solid #F06A90;color:#F06A90;display:grid;place-items:center;text-align:center;font-family:var(--font-title);font-weight:400;font-size:14px;line-height:1.15;transform:rotate(-12deg);background:rgba(255,221,230,.4)}
+
+/* ---------- ③ 파스텔 카드 ---------- */
+.d-pastel{
+  border-radius:28px;padding:22px 20px 20px;overflow:hidden;
+  background:linear-gradient(160deg,#E4FBF3 0%,#FFFBE3 55%,#E3F2FF 100%);
+  border:4px solid #fff;box-shadow:0 10px 28px rgba(63,191,156,.25);
+}
+.d-pastel .deco{position:absolute;font-size:30px;opacity:.9}
+.deco.d1{top:10px;left:14px}.deco.d2{top:12px;right:16px}
+.deco.d3{bottom:60px;right:12px;font-size:34px}
+.card-ribbon{
+  display:block;width:max-content;margin:0 auto;background:#fff;color:var(--mint-d);
+  font-family:var(--font-title);font-weight:400;font-size:15px;padding:4px 14px;border-radius:999px;
+}
+.card-title{text-align:center;font-family:var(--font-title);font-weight:400;font-size:26px;line-height:1.3;margin:12px 0 14px;color:var(--ink);word-break:keep-all}
+.card-title .t-name{font-size:32px;color:#2E9C80}
+.card-title .bracket{color:var(--mint-d);font-size:30px;margin:0 4px}
+.card-sec{background:rgba(255,255,255,.88);border-radius:18px;padding:12px 14px;margin-top:10px}
+.card-sec-head{display:inline-block;font-family:var(--font-title);font-weight:400;font-size:17px;padding:3px 12px;border-radius:999px;background:var(--c);color:var(--ink);margin-bottom:6px}
+.card-sec ol{list-style:none;margin:0;padding:0}
+.card-sec li{display:flex;gap:8px;align-items:flex-start;padding:6px 0;font-size:15.5px;word-break:keep-all;border-bottom:1px dashed #E5ECEF}
+.card-sec li:last-child{border-bottom:none}
+.card-sec .no{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--cd);color:#fff;font-family:var(--font-title);font-weight:400;font-size:14px;display:grid;place-items:center;margin-top:1px}
+.card-foot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px;padding:0 4px}
+.card-foot .date{font-size:13.5px;color:var(--ink-soft)}
+.card-foot .sign{font-family:var(--font-title);font-weight:400;font-size:18px;text-align:right}
+.card-foot .sign span{display:inline-block;border-bottom:2px solid var(--ink);padding:0 6px 1px;margin-left:4px;min-width:70px;text-align:center}
+
+/* ===== 4단계: 매일 실천 체크 (한 장씩 넘기기) ===== */
+/* 평일 5일 인디케이터 */
+.ind-box{background:#F7FBFE;border-radius:20px;padding:12px 12px 10px;margin-bottom:16px;border:2px solid var(--sky)}
+.ind-head{display:flex;justify-content:space-between;align-items:center;margin:0 4px 10px;font-family:var(--font-title);font-weight:400}
+.ind-head .t{font-size:17px}
+.ind-head .n{font-size:15px;color:var(--ink-soft)}
+.ind-head .n b{font-weight:400;font-size:22px;color:var(--mint-d)}
+.ind{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;position:relative}
+.slot{text-align:center;font-family:var(--font-title);font-weight:400}
+.slot .dot{
+  width:46px;height:46px;margin:0 auto 4px;border-radius:50%;display:grid;place-items:center;
+  background:#E6EDF2;color:#fff;font-size:22px;border:3px solid transparent;transition:all .3s;
+}
+.slot .dt{font-size:13px;color:var(--ink-soft);line-height:1.25}
+.slot.done .dot{background:var(--mint-d);box-shadow:0 4px 0 rgba(0,0,0,.08)}
+.slot.today .dot{border-color:var(--sky-d);background:#fff;color:var(--sky-d);animation:ring 1.6s ease-in-out infinite}
+.slot.today.done .dot{background:var(--mint-d);color:#fff;border-color:var(--mint-d);animation:none}
+.slot.today .dt{color:var(--sky-d)}
+.slot.missed .dot{background:#F1F3F5;color:#B9C6CE;border:3px dashed #D5DEE4}
+@keyframes ring{0%,100%{box-shadow:0 0 0 0 rgba(62,155,224,.35)}50%{box-shadow:0 0 0 7px rgba(62,155,224,0)}}
+.ind-bar{height:10px;border-radius:999px;background:#E6EDF2;margin:10px 4px 0;overflow:hidden}
+.ind-bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--mint-d),#7FDCC4);transition:width .5s}
+
+/* 한 장씩 넘기는 체크 카드 */
+.q-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;min-height:44px}
+.q-prev{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-family:var(--font-title);font-weight:400;font-size:16px;color:var(--ink-soft);min-height:44px}
+.q-prev:disabled{visibility:hidden}
+.q-count{font-family:var(--font-title);font-weight:400;font-size:18px;color:var(--ink-soft)}
+.q-count b{font-weight:400;font-size:24px;color:var(--ink)}
+.q-dots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:2px 0 12px}
+.q-dots i{width:12px;height:12px;border-radius:50%;background:#DCE6EC;transition:all .2s}
+.q-dots i.o{background:var(--mint-d)}
+.q-dots i.x{background:var(--pink-d)}
+.q-dots i.cur{transform:scale(1.45);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--sky-d)}
+.q-card{
+  border-radius:26px;padding:26px 20px;background:var(--c);min-height:190px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+  border:3px solid #fff;box-shadow:0 8px 22px rgba(62,155,224,.15);
+}
+.q-cat{background:#fff;border-radius:999px;padding:4px 14px;font-size:15px;margin-bottom:14px;color:var(--ink)}
+.q-text{font-size:24px;line-height:1.45;word-break:keep-all;color:#2B3A44}
+.q-ask{text-align:center;margin:18px 0 12px;color:var(--ink-soft);font-size:17px}
+.q-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.q-btns button{
+  border:3px solid var(--line);background:#fff;border-radius:24px;min-height:118px;padding:10px;
+  font-family:var(--font-title);font-weight:400;font-size:20px;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  box-shadow:0 5px 0 rgba(0,0,0,.06);transition:transform .1s, background .15s, border-color .15s;
+}
+.q-btns button:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.06)}
+.q-btns .mk{font-size:46px;line-height:1}
+.q-o .mk{color:var(--mint-d)} .q-x .mk{color:var(--pink-d)}
+.q-o.on{background:var(--mint);border-color:var(--mint-d)}
+.q-x.on{background:var(--pink);border-color:var(--pink-d)}
+.slide-next{animation:slideNext .32s ease-out}
+.slide-prev{animation:slidePrev .32s ease-out}
+@keyframes slideNext{from{transform:translateX(48px);opacity:0}to{transform:none;opacity:1}}
+@keyframes slidePrev{from{transform:translateX(-48px);opacity:0}to{transform:none;opacity:1}}
+
+/* 결과·쉬는 날 화면 */
+.r-wrap{text-align:center;padding:4px 4px 2px}
+.r-circle{
+  width:168px;height:168px;border-radius:50%;margin:6px auto 12px;display:grid;place-items:center;
+  background:conic-gradient(var(--mint-d) calc(var(--p) * 1%), #E6EDF2 0);
+}
+.r-circle .in{width:132px;height:132px;border-radius:50%;background:#fff;display:grid;place-items:center;font-family:var(--font-title);font-weight:400;font-size:40px;color:#2E9C80;line-height:1}
+.r-circle .in small{display:block;font-size:14px;color:var(--ink-soft);margin-top:4px}
+.r-sub{font-family:var(--font-title);font-weight:400;font-size:20px;margin:0 0 4px}
+.r-msg{color:var(--ink-soft);font-size:16px;margin:0 0 14px;word-break:keep-all}
+.r-sent{display:inline-block;background:var(--mint);color:#1F7F65;border-radius:999px;padding:6px 14px;font-size:15px;margin-bottom:12px}
+.r-big{font-size:64px;line-height:1;margin:8px 0}
+.r-wrap .btn{margin-top:10px}
+
+.rule .text,.check-item .ct,.card-sec li,.h-move .tx,.l-list li{color:#2B3A44}
+b,strong{font-weight:400}
+.foot-note{text-align:center;color:var(--ink-soft);font-size:13px;margin-top:26px}
+.privacy-note{margin:10px 2px 0;font-size:13.5px;line-height:1.55;color:var(--ink-soft);word-break:keep-all}
+.privacy-note b{color:var(--pink-d)}
+.clear-box{margin-top:18px;padding:14px;border-radius:18px;background:#F7FAFC;border:2px dashed var(--line);text-align:center}
+.clear-box p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);word-break:keep-all}
+.clear-box.ready{background:#FFF8FA;border-color:var(--pink-d)}
+.confirm-box .big{font-size:52px;line-height:1}
+.confirm-box .cm-msg{font-size:15.5px;color:var(--ink);line-height:1.6;word-break:keep-all}
+.confirm-box .cm-warn{color:var(--pink-d);font-weight:700;font-size:14.5px;word-break:keep-all}
+.confirm-box .cm-warn:empty{display:none}
+.foot-note button{border:none;background:none;color:var(--ink-soft);text-decoration:underline;font-size:13px}
+
+/* ===== 토스트 / 모달 / 축하 ===== */
+.toast{
+  position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);
+  background:rgba(58,72,82,.95);color:#fff;padding:12px 20px;border-radius:999px;font-size:16px;
+  opacity:0;pointer-events:none;transition:all .25s;z-index:50;max-width:92vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.modal{position:fixed;inset:0;background:rgba(30,40,50,.55);display:grid;place-items:center;z-index:40;padding:16px}
+.modal-box{background:#fff;border-radius:26px;padding:18px;width:100%;max-width:460px;max-height:92vh;overflow:auto;text-align:center}
+.modal-box h3{margin:4px 0 10px;font-size:22px}
+.modal-box img{width:100%;border-radius:18px;box-shadow:var(--shadow)}
+.modal-box p{font-size:14.5px;color:var(--ink-soft);margin:10px 0 0}
+
+.celebrate{position:fixed;inset:0;z-index:60;pointer-events:none;display:grid;place-items:center}
+.celebrate .msg{
+  background:#fff;border-radius:28px;padding:22px 30px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.18);
+  animation:pop .4s ease-out;
+}
+.celebrate .msg .big{font-size:56px;line-height:1}
+.celebrate .msg h3{margin:8px 0 2px;font-size:24px;color:var(--mint-d)}
+.celebrate .piece{position:fixed;top:-40px;font-size:28px;animation:fall linear forwards}
+@keyframes pop{0%{transform:scale(.5);opacity:0}80%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+
+/* ===== 반응형 ===== */
+@media (min-width:700px){
+  .wrap{padding:24px 28px 80px}
+  .panel{padding:26px}
+  .rule{font-size:17px}
+}
+@media (max-width:420px){
+  .panel{padding:16px}
+  .name-row{flex-direction:column}
+  .custom-row{flex-direction:column}
+  .ox button{width:46px;height:46px;font-size:21px}
+  .card-title{font-size:23px}.card-title .t-name{font-size:28px}
+  .h-name{font-size:26px}.h-hp b{font-size:28px}.h-art{height:160px}
+  .l-photo{flex-basis:84px;height:108px;font-size:52px}.l-head h3{font-size:20px}
+  .slot .dot{width:38px;height:38px;font-size:18px}.slot .dt{font-size:12px}.ind{gap:4px}
+  .q-text{font-size:21px}.q-btns button{min-height:104px}
+  .design-pick button{font-size:15px;min-height:74px}.design-pick button small{display:none}
+  .mascot-pick{gap:6px}.mascot-pick button{width:44px;height:44px;font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== 타이틀 ===== -->
+  <header class="hero">
+    <div class="bubble">🤧🛡️</div>
+    <h1>알레르기 예방 약속 카드</h1>
+    <p>나만의 예방 수칙을 고르고, 매일 지켜 봐요!</p>
+    <button id="installBtn" class="install-btn hidden" type="button">📲 바탕화면에 설치하기</button>
+  </header>
+
+  <!-- ===== 1단계: 이름 ===== -->
+  <section class="panel" id="step1">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <div><h2>내 이름을 알려 줘!</h2><small>카드에 들어갈 이름이에요</small></div>
+    </div>
+    <div class="name-row">
+      <input id="nameInput" class="name-input" type="text" maxlength="10" placeholder="예) 김지민" autocomplete="off" aria-label="이름 입력">
+    </div>
+    <div class="name-preview" id="namePreview">✏️ 이름을 쓰면 카드 제목이 여기에 보여요</div>
+  </section>
+
+  <!-- ===== 2단계: 수칙 선택 ===== -->
+  <section class="panel" id="step2">
+    <div class="step-head">
+      <div class="step-num" style="background:var(--yellow-d)">2</div>
+      <div><h2>지킬 수칙을 골라 봐!</h2><small>상자를 눌러서 열고, 지킬 수 있는 약속에 체크해요</small></div>
+    </div>
+
+    <div id="ruleGroups"></div>
+
+    <div class="custom-box theme-pink">
+      <h3>⭐ 나만의 수칙 직접 기입하기</h3>
+      <div class="custom-row">
+        <input id="customInput" type="text" maxlength="60" placeholder="예) 반려견과 논 뒤에는 손 씻기" aria-label="나만의 수칙 입력">
+        <button id="addCustomBtn" class="btn pink small" type="button">➕ 추가</button>
+      </div>
+      <p class="privacy-note">🔒 알레르기 종류나 병 이름 같은 <b>건강 정보는 적지 않아요.</b><br>나만의 수칙은 내 카드에만 나오고, 선생님께는 <b>"나만의 수칙 1"</b>처럼 번호만 보내져요.</p>
+      <div class="custom-list" id="customList"></div>
+    </div>
+
+    <div class="make-bar">
+      <div class="count">선택 <b id="totalCount">0</b>개</div>
+      <button id="makeCardBtn" class="btn" type="button">🎨 카드 만들기</button>
+    </div>
+  </section>
+
+  <!-- ===== 3단계: 카드 ===== -->
+  <section class="panel hidden" id="step3">
+    <div class="step-head">
+      <div class="step-num" style="background:var(--sky-d)">3</div>
+      <div><h2>나의 약속 카드 완성!</h2><small>저장해서 배경화면이나 앨범에 넣어 두세요</small></div>
+    </div>
+    <div class="pick-title">🎨 카드 디자인 고르기</div>
+    <div class="design-pick" id="designPick"></div>
+    <div class="pick-title">🐾 나의 수호 친구 고르기</div>
+    <div class="mascot-pick" id="mascotPick"></div>
+    <div class="card-stage">
+      <div class="promise-card" id="promiseCard"></div>
+    </div>
+    <div class="btn-row">
+      <button id="downloadBtn" class="btn sky" type="button">📥 카드 다운로드</button>
+      <button id="editBtn" class="btn ghost" type="button">✏️ 수칙 다시 고르기</button>
+    </div>
+  </section>
+
+  <!-- ===== 4단계: 매일 실천 체크 (한 장씩 넘기기) ===== -->
+  <section class="panel hidden" id="step4">
+    <div class="step-head">
+      <div class="step-num" style="background:var(--pink-d)">4</div>
+      <div><h2 id="checkTitle">오늘의 실천 체크</h2><small>한 장씩 보면서 O / X를 눌러요</small></div>
+    </div>
+
+    <div class="ind-box" aria-label="5일 실천 인디케이터">
+      <div class="ind-head"><span class="t">🌱 5일 실천 챌린지</span><span class="n"><b id="indNum">0</b> / 5일</span></div>
+      <div class="ind" id="indSlots"></div>
+      <div class="ind-bar"><i id="indFill"></i></div>
+    </div>
+
+    <div id="checkStage"></div>
+
+    <div class="clear-box" id="clearBox">
+      <p>🧹 친구와 태블릿을 함께 쓰나요? 다 보냈으면 내 기록을 지워 주세요.</p>
+      <button id="clearBtn" class="btn block ghost" type="button">🧹 이 기기에서 내 기록 지우기</button>
+    </div>
+  </section>
+
+  <p class="foot-note">
+    내 기록은 이 기기에만 저장돼요.<br>
+    <button id="resetBtn" type="button">처음부터 다시 하기</button>
+  </p>
+</div>
+
+<!-- 기록 지우기 확인 창 -->
+<div class="modal hidden" id="clearModal" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
+  <div class="modal-box confirm-box">
+    <div class="big">🧹</div>
+    <h3 id="clearTitle">정말 지울까요?</h3>
+    <p class="cm-msg">이 기기에 저장된 <b>내 이름, 고른 수칙, 카드, 실천 기록</b>이 모두 사라지고 처음 화면으로 돌아가요.<br>지운 기록은 다시 되살릴 수 없어요.</p>
+    <p class="cm-warn" id="clearWarn"></p>
+    <div class="btn-row">
+      <button id="clearNo" class="btn sky" type="button">아니요, 그대로 둘래요</button>
+      <button id="clearYes" class="btn pink" type="button">네, 지울게요</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 메시지 -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- 카드 이미지 미리보기 (아이패드/아이폰은 길게 눌러 저장) -->
+<div class="modal hidden" id="imgModal">
+  <div class="modal-box">
+    <h3>🎉 카드 이미지가 준비됐어요</h3>
+    <img id="cardImg" alt="나의 알레르기 예방 약속 카드">
+    <div class="btn-row">
+      <a id="saveLink" class="btn sky" download="약속카드.png" style="text-decoration:none">💾 저장하기</a>
+      <button id="closeModal" class="btn ghost" type="button">닫기</button>
+    </div>
+    <p>저장이 안 되면 그림을 <b>길게 꾹</b> 눌러서 '사진에 저장'을 골라요.</p>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ① 설정: 구글 앱스 스크립트 웹앱 URL을 여기에 붙여 넣으세요
+   ========================================================= */
+const CONFIG = {
+  GAS_URL: "https://script.google.com/macros/s/AKfycbyNxDwWGYkX-sz-7X4Xwe3zZq0JkRO1Cb7RA9wGRDfFEVnGQ2u9icWp8I6hJlFhwB1u4w/exec",
+  STORAGE_KEY: "allergyPromiseCard_v1",
+
+  // 공휴일 (주말이 아닌 날만 적으면 돼요). 5일 챌린지에서 건너뛰어요.
+  HOLIDAYS: [
+    // 2026년
+    "2026-10-05", // 개천절 대체공휴일
+    "2026-10-09", // 한글날
+    "2026-12-25", // 크리스마스
+    // 2027년
+    "2027-01-01", // 신정
+    "2027-02-08", "2027-02-09", // 설날 연휴, 대체공휴일
+    "2027-03-01", // 삼일절
+    "2027-05-03", // 근로자의 날 대체공휴일
+    "2027-05-05", // 어린이날
+    "2027-05-13", // 부처님오신날
+    "2027-07-19", // 제헌절 대체공휴일
+    "2027-08-16", // 광복절 대체공휴일
+    "2027-09-14", "2027-09-15", "2027-09-16", // 추석 연휴
+    "2027-10-04", // 개천절 대체공휴일
+    "2027-10-11", // 한글날 대체공휴일
+    "2027-12-27"  // 크리스마스 대체공휴일
+  ],
+  // 학교 재량휴업일·개교기념일 등 (예: "2026-11-20")
+  SCHOOL_OFF_DAYS: []
+};
+
+/* =========================================================
+   ② 예방수칙 데이터 (선생님이 문구를 자유롭게 수정하세요)
+   - title / emoji / rules 의 글자만 바꾸면 화면과 카드에 반영돼요.
+   - theme: mint, yellow, sky, pink 중 하나
+   ========================================================= */
+const RULE_CATEGORIES = [
+  {
+    id: "home", title: "집에서", emoji: "🏠", theme: "mint",
+    rules: [
+      "매일 아침 일어나면 내 이불을 가지런히 정리하고 방바닥의 먼지 청소하기",
+      "하루에 한 번, 창문을 활짝 열고 10분 이상 방 안의 공기 환기하기",
+      "비누, 샴푸, 로션을 새로 쓸 때 내 피부에 안 맞는 성분이 있는지 뒷면 확인하기",
+      "먼지나 곰팡이가 생기지 않도록 책상 위와 책장 구석구석을 물티슈로 닦기",
+      "우리 몸의 면역력을 튼튼하게 키우기 위해 하루 15분 이상 규칙적으로 운동하기"
+    ]
+  },
+  {
+    id: "school", title: "학교에서", emoji: "🏫", theme: "yellow",
+    rules: [
+      "급식을 먹을 때 친구가 피해야 하는 음식이 있다면 억지로 권하거나 장난치지 않기",
+      "두드러기가 나거나 기침을 많이 하는 친구를 보아도 절대 차별하거나 놀리지 않기",
+      "알레르기로 힘들어하는 친구가 있다면 옆에서 괜찮은지 물어보고 다정하게 도와주기",
+      "내가 심한 알레르기가 있다면, 짝꿍과 선생님께 내 상태와 비상약 위치를 미리 알리기",
+      "친구가 갑자기 숨쉬기 힘들어하면 큰 소리로 선생님을 부르고 119에 신고해 달라고 외치기"
+    ]
+  },
+  {
+    id: "outside", title: "외부활동 시", emoji: "🌳", theme: "sky",
+    rules: [
+      "봄철 꽃가루가 많이 날리거나 먼지가 심한 날에는 외출할 때 마스크 꼭 쓰기",
+      "놀이터나 공원에서 신나게 놀고 집에 돌아오면 가장 먼저 비누로 꼼꼼하게 손 씻기",
+      "풀밭에 함부로 눕지 않고, 곤충에 물리거나 햇빛에 피부가 상하지 않게 얇은 긴 옷 입기",
+      "아나필락시스 비상약(자가 주사기)이 필요한 경우, 소풍이나 여행 갈 때 꼭 챙겨가기",
+      "밖에서 갑자기 두드러기가 나거나 눈이 가려울 때는 함부로 비비지 말고 병원 가기"
+    ]
+  }
+];
+const CUSTOM_CATEGORY = { id: "custom", title: "나만의 수칙", emoji: "⭐", theme: "pink" };
+
+/* =========================================================
+   ③ 한글 조사 자동 변환
+   ========================================================= */
+// 마지막 글자에 받침(종성)이 있는지 확인
+function hasBatchim(word) {
+  const s = String(word || "").trim();
+  if (!s) return false;
+  const ch = s.charAt(s.length - 1);
+  const code = ch.charCodeAt(0);
+  if (code >= 0xAC00 && code <= 0xD7A3) return (code - 0xAC00) % 28 !== 0; // 한글 완성형
+  if (/[0-9]/.test(ch)) return "0136789".includes(ch) && ch !== "9";     // 영·일·삼·육·칠·팔
+  return false; // 영문 등은 받침 없음으로 처리
+}
+// 받침이 'ㄹ'인지 (으로/로 구분용)
+function isRieulBatchim(word) {
+  const s = String(word || "").trim();
+  const code = s.charCodeAt(s.length - 1);
+  return code >= 0xAC00 && code <= 0xD7A3 && (code - 0xAC00) % 28 === 8;
+}
+// 일반 조사 붙이기: josa("사과", "을/를") → "사과를"
+function josa(word, type) {
+  const b = hasBatchim(word);
+  const table = {
+    "이/가": ["이", "가"], "은/는": ["은", "는"], "을/를": ["을", "를"],
+    "과/와": ["과", "와"], "아/야": ["아", "야"], "이에요/예요": ["이에요", "예요"], "의": ["의", "의"]
+  };
+  if (type === "으로/로") return word + (b && !isRieulBatchim(word) ? "으로" : "로");
+  const pair = table[type];
+  return pair ? word + (b ? pair[0] : pair[1]) : word;
+}
+// 친구 이름처럼 부르기: "지민"→"지민이가 / 지민이는 / 지민아", "철수"→"철수가 / 철수는 / 철수야"
+function friendlyName(name, type) {
+  const n = String(name || "").trim();
+  if (!n) return "";
+  if (type === "아/야") return josa(n, "아/야");
+  const base = hasBatchim(n) ? n + "이" : n;
+  return josa(base, type);
+}
+// 성까지 쓴 3글자 이름이면 이름 부분만 부르기 (김지민 → 지민)
+function givenName(fullName) {
+  const n = String(fullName || "").trim().replace(/\s+/g, "");
+  return /^[가-힣]{3}$/.test(n) ? n.slice(1) : n;
+}
+
+/* =========================================================
+   ④ 상태 저장 (기기 안에만 저장)
+   ========================================================= */
+let state = { name: "", selected: [], custom: [], cardMade: false, checks: {}, sent: {}, design: "hero", mascot: "🦊", startDate: "" };
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY));
+    if (s) state = Object.assign(state, s);
+  } catch (e) {}
+}
+function saveState() {
+  try { localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+/* =========================================================
+   ⑤ 도우미 함수
+   ========================================================= */
+const $ = (sel) => document.querySelector(sel);
+const pad = (n) => String(n).padStart(2, "0");
+function dateKey(d = new Date()) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+function timeStr(d = new Date()) { return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; }
+function koreanDate(d = new Date()) {
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  return `${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+let toastTimer;
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2300);
+}
+function getRule(id) {
+  const c = state.custom.find((r) => r.id === id);
+  if (c) return { id, text: c.text, cat: CUSTOM_CATEGORY };
+  const [cid, idx] = id.split("-");
+  const cat = RULE_CATEGORIES.find((x) => x.id === cid);
+  if (!cat || !cat.rules[idx]) return null;
+  return { id, text: cat.rules[idx], cat };
+}
+// 화면 순서(집→학교→외부→나만의)대로 선택된 수칙
+function selectedRules() {
+  const order = [...RULE_CATEGORIES.map((c) => c.id), "custom"];
+  return state.selected
+    .map(getRule)
+    .filter(Boolean)
+    .sort((a, b) => {
+      const ca = order.indexOf(a.cat.id), cb = order.indexOf(b.cat.id);
+      if (ca !== cb) return ca - cb;
+      return state.selected.indexOf(a.id) - state.selected.indexOf(b.id);
+    });
+}
+
+/* =========================================================
+   ⑥ 1단계: 이름 입력 + 미리보기
+   ========================================================= */
+function updateNamePreview() {
+  const name = $("#nameInput").value.trim();
+  const box = $("#namePreview");
+  if (!name) { box.innerHTML = "✏️ 이름을 쓰면 카드 제목이 여기에 보여요"; return; }
+  const g = givenName(name);
+  const t = cardTitle(name);
+  box.innerHTML = `👉 <b>&lt; ${esc(t)} &gt;</b>${josa(t, "을/를").slice(t.length)} 만들어 볼까요?`;
+}
+
+/* =========================================================
+   ⑦ 2단계: 수칙 목록 그리기
+   ========================================================= */
+function ruleRow(id, text, deletable) {
+  const label = document.createElement("label");
+  label.className = "rule";
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.checked = state.selected.includes(id);
+  const box = document.createElement("span");
+  box.className = "check";
+  const t = document.createElement("span");
+  t.className = "text";
+  t.textContent = text;
+  label.append(cb, box, t);
+  label.classList.toggle("on", cb.checked);
+  cb.addEventListener("change", () => {
+    toggleSelect(id, cb.checked);
+    label.classList.toggle("on", cb.checked);
+  });
+  if (deletable) {
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "del";
+    del.setAttribute("aria-label", "삭제");
+    del.textContent = "✕";
+    del.addEventListener("click", (e) => { e.preventDefault(); deleteCustom(id); });
+    label.append(del);
+  }
+  return label;
+}
+
+function renderRules() {
+  const wrap = $("#ruleGroups");
+  wrap.innerHTML = "";
+  RULE_CATEGORIES.forEach((cat, i) => {
+    const d = document.createElement("details");
+    d.className = `group theme-${cat.theme}`;
+    if (i === 0) d.open = true;
+    d.innerHTML = `
+      <summary>
+        <span class="g-emoji">${cat.emoji}</span>
+        <span class="g-title">${esc(cat.title)}</span>
+        <span class="g-count" data-cat="${cat.id}"></span>
+        <span class="g-arrow">▾</span>
+      </summary>
+      <div class="g-body"></div>`;
+    const body = d.querySelector(".g-body");
+    cat.rules.forEach((text, idx) => body.appendChild(ruleRow(`${cat.id}-${idx}`, text, false)));
+    wrap.appendChild(d);
+  });
+  renderCustom();
+  updateCounts();
+}
+
+function renderCustom() {
+  const list = $("#customList");
+  list.innerHTML = "";
+  state.custom.forEach((r) => list.appendChild(ruleRow(r.id, r.text, true)));
+}
+
+function updateCounts() {
+  RULE_CATEGORIES.forEach((cat) => {
+    const n = state.selected.filter((id) => id.startsWith(cat.id + "-")).length;
+    const el = document.querySelector(`.g-count[data-cat="${cat.id}"]`);
+    if (el) el.textContent = n ? `${n}개 선택` : "";
+  });
+  $("#totalCount").textContent = selectedRules().length;
+}
+
+function toggleSelect(id, on) {
+  state.selected = state.selected.filter((x) => x !== id);
+  if (on) state.selected.push(id);
+  saveState();
+  updateCounts();
+}
+
+function addCustom() {
+  const input = $("#customInput");
+  const text = input.value.trim().replace(/\s+/g, " ");
+  if (text.length < 2) { toast("수칙을 2글자 이상 적어 주세요 ✏️"); input.focus(); return; }
+  const allTexts = [...RULE_CATEGORIES.flatMap((c) => c.rules), ...state.custom.map((r) => r.text)];
+  if (allTexts.includes(text)) { toast("이미 있는 수칙이에요 😊"); return; }
+  const id = "custom-" + Date.now();
+  state.custom.push({ id, text });
+  state.selected.push(id);
+  saveState();
+  input.value = "";
+  renderCustom();
+  updateCounts();
+  toast("나만의 수칙이 추가됐어요! ⭐");
+}
+
+function deleteCustom(id) {
+  state.custom = state.custom.filter((r) => r.id !== id);
+  state.selected = state.selected.filter((x) => x !== id);
+  saveState();
+  renderCustom();
+  updateCounts();
+}
+
+/* =========================================================
+   ⑧ 3단계: 카드 만들기
+   ========================================================= */
+function makeCard() {
+  const name = $("#nameInput").value.trim();
+  if (!name) {
+    toast("먼저 이름을 적어 주세요 ✏️");
+    $("#step1").scrollIntoView({ behavior: "smooth", block: "center" });
+    $("#nameInput").focus();
+    return;
+  }
+  if (selectedRules().length === 0) { toast("수칙을 1개 이상 골라 주세요 ✅"); return; }
+  state.name = name;
+  if (!state.startDate) state.startDate = dateKey();
+  flowIdx = null;
+  state.cardMade = true;
+  saveState();
+  renderCard();
+  renderCheck();
+  $("#step3").classList.remove("hidden");
+  $("#step4").classList.remove("hidden");
+  setTimeout(() => $("#step3").scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  toast("멋진 약속 카드가 완성됐어요! 🎉");
+}
+
+/* ---------- 카드 디자인 설정 (선생님이 제목·문구를 바꿀 수 있어요) ----------
+   {이름의} → "지민이의 / 철수의" 처럼 자동으로 바뀌어요. */
+const CARD_DESIGNS = [
+  { id: "hero",    icon: "⚡", label: "히어로 카드",   desc: "수집 카드 느낌",   title: "{이름의} 알레르기 방어 액션카드" },
+  { id: "license", icon: "🎖️", label: "지킴이 자격증", desc: "멋진 자격증 느낌", title: "{이름의} 알레르기 지킴이 자격증" },
+  { id: "pastel",  icon: "🌼", label: "파스텔 카드",   desc: "깔끔한 약속 카드", title: "{이름의} 알레르기 예방 액션카드" }
+];
+// 수호 친구(카드 캐릭터)
+const MASCOTS = ["🦊", "🐻", "🐰", "🐯", "🐼", "🦄", "🐲", "🐧"];
+// 히어로 카드: 카테고리별 기술 파워 (나만의 수칙은 '필살기')
+const MOVE_POWER = { home: 20, school: 30, outside: 20, custom: 50 };
+// 수칙 개수에 따른 등급
+const GRADES = [
+  { min: 12, stars: 5, name: "전설의" },
+  { min: 9,  stars: 4, name: "든든한" },
+  { min: 6,  stars: 3, name: "튼튼한" },
+  { min: 3,  stars: 2, name: "씩씩한" },
+  { min: 0,  stars: 1, name: "새싹" }
+];
+
+function currentDesign() { return CARD_DESIGNS.find((d) => d.id === state.design) || CARD_DESIGNS[0]; }
+function cardTitle(name, design = currentDesign()) {
+  return design.title.replace("{이름의}", friendlyName(givenName(name), "의"));
+}
+function gradeOf(n) { return GRADES.find((g) => n >= g.min); }
+function starStr(n) { return "★".repeat(n) + "☆".repeat(5 - n); }
+function fmtDate(d = new Date()) { return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.`; }
+function licenseNo(name) {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) % 10000;
+  const d = new Date();
+  return `AL-${d.getFullYear()}${pad(d.getMonth() + 1)}-${String(h).padStart(4, "0")}`;
+}
+
+function renderPickers() {
+  $("#designPick").innerHTML = CARD_DESIGNS.map((d) =>
+    `<button type="button" data-id="${d.id}" class="${d.id === currentDesign().id ? "on" : ""}" aria-pressed="${d.id === currentDesign().id}">
+       <span class="ico">${d.icon}</span>${esc(d.label)}<small>${esc(d.desc)}</small></button>`).join("");
+  $("#mascotPick").innerHTML = MASCOTS.map((m) =>
+    `<button type="button" data-m="${m}" class="${m === state.mascot ? "on" : ""}" aria-label="수호 친구 ${m}">${m}</button>`).join("");
+}
+
+function renderCard() {
+  renderPickers();
+  const g = givenName(state.name);
+  const rules = selectedRules();
+  const design = currentDesign();
+  const title = cardTitle(state.name, design);
+  const grade = gradeOf(rules.length);
+  const m = state.mascot || MASCOTS[0];
+  const card = $("#promiseCard");
+  card.className = `promise-card d-${design.id}`;
+
+  if (design.id === "hero") {
+    const power = rules.reduce((s, r) => s + (MOVE_POWER[r.cat.id] || 20), 0);
+    const moves = rules.map((r) => `
+      <li class="h-move theme-${r.cat.theme}">
+        <span class="ic">${r.cat.emoji}</span>
+        <span class="tx">${r.cat.id === "custom" ? "<em>필살기!</em>" : ""}${esc(r.text)}</span>
+        <span class="pw">${MOVE_POWER[r.cat.id] || 20}</span>
+      </li>`).join("");
+    card.innerHTML = `
+      <div class="holo"></div>
+      <div class="h-in">
+        <div class="h-top">
+          <div><span class="h-stage">알레르기 수호대</span><div class="h-name">${esc(g)}</div></div>
+          <div class="h-hp">방어력<b>${power}</b></div>
+        </div>
+        <div class="h-art">
+          <span class="sp" style="top:14px;left:22px">✨</span><span class="sp" style="top:40px;right:30px">🫧</span>
+          <span class="sp" style="bottom:34px;right:20px">💚</span>
+          <div class="ring"></div><span class="mascot">${m}</span><span class="shield">🛡️</span>
+          <span class="type">🛡️ 예방 타입</span><span class="rarity">${starStr(grade.stars)}</span>
+        </div>
+        <div class="h-strip">&lt; ${esc(title)} &gt;</div>
+        <ul class="h-moves">${moves}</ul>
+        <div class="h-info">
+          <div><b>등급</b>${grade.name} 수호대원</div>
+          <div><b>약점</b>먼지·꽃가루</div>
+          <div><b>기술 수</b>${rules.length}개</div>
+        </div>
+        <div class="h-flavor">${esc(friendlyName(g, "은/는"))} 알레르기로부터 나와 친구를 지키는 수호대원! 약속을 매일 지킬수록 점점 더 강해진다.</div>
+        <div class="h-foot"><span>${fmtDate()}</span><span class="sig">약속한 사람 · ${esc(state.name)}</span></div>
+      </div>`;
+    return;
+  }
+
+  if (design.id === "license") {
+    const items = rules.map((r) => `<li class="theme-${r.cat.theme}"><span class="ck">✔</span><span>${esc(r.text)}</span></li>`).join("");
+    card.innerHTML = `
+      <div class="l-head"><small>ALLERGY GUARDIAN</small><h3>&lt; ${esc(title)} &gt;</h3></div>
+      <div class="l-body">
+        <div class="l-id">
+          <div class="l-photo">${m}</div>
+          <div class="l-fields">
+            <div><span>이름</span><b>${esc(state.name)}</b></div>
+            <div><span>등급</span><b>${grade.name} 지킴이</b></div>
+            <div><span>별점</span><b class="stars">${starStr(grade.stars)}</b></div>
+            <div><span>번호</span><b>${licenseNo(state.name)}</b></div>
+          </div>
+        </div>
+        <div class="l-sec">📋 나의 실천 약속 ${rules.length}가지</div>
+        <ul class="l-list">${items}</ul>
+        <div class="l-oath">위 학생은 알레르기로부터 나와 친구를 지키기 위한<br>실천 약속을 정하였으므로 이 자격증을 드립니다.</div>
+        <div class="l-sign">
+          <div class="who">${fmtDate()}<br>약속한 사람 <b>${esc(state.name)}</b></div>
+          <div class="l-stamp">약속<br>인증</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // 파스텔 카드
+  const cats = [...RULE_CATEGORIES, CUSTOM_CATEGORY];
+  let no = 0;
+  const sections = cats.map((cat) => {
+    const items = rules.filter((r) => r.cat.id === cat.id);
+    if (!items.length) return "";
+    return `
+      <div class="card-sec theme-${cat.theme}">
+        <div class="card-sec-head">${cat.emoji} ${esc(cat.title)}</div>
+        <ol>${items.map((r) => `<li><span class="no">${++no}</span><span>${esc(r.text)}</span></li>`).join("")}</ol>
+      </div>`;
+  }).join("");
+  const parts = title.split(friendlyName(g, "의"));
+  card.innerHTML = `
+    <span class="deco d1">🌼</span><span class="deco d2">🫧</span><span class="deco d3">${m}</span>
+    <span class="card-ribbon">🛡️ ACTION CARD</span>
+    <div class="card-title">
+      <span class="bracket">&lt;</span>${esc(parts[0] || "")}<span class="t-name">${esc(friendlyName(g, "의"))}</span><br>
+      ${esc((parts[1] || "").trim())}
+      <span class="bracket">&gt;</span>
+    </div>
+    ${sections}
+    <div class="card-foot">
+      <div class="date">${fmtDate()}</div>
+      <div class="sign">약속한 사람<span>${esc(state.name)}</span></div>
+    </div>`;
+}
+
+async function downloadCard() {
+  if (typeof html2canvas === "undefined") { toast("인터넷 연결을 확인해 주세요 🌐"); return; }
+  const btn = $("#downloadBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ 그리는 중...";
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const cardEl = $("#promiseCard");
+    cardEl.classList.add("capturing");
+    let canvas;
+    try { canvas = await html2canvas(cardEl, { scale: 2, backgroundColor: null, useCORS: true }); }
+    finally { cardEl.classList.remove("capturing"); }
+    const url = canvas.toDataURL("image/png");
+    $("#cardImg").src = url;
+    const link = $("#saveLink");
+    link.href = url;
+    link.download = `${cardTitle(state.name).replace(/\s+/g, "_")}.png`;
+    $("#imgModal").classList.remove("hidden");
+  } catch (e) {
+    console.error(e);
+    toast("이미지를 만들지 못했어요. 화면을 캡처해 주세요 📸");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "📥 카드 다운로드";
+  }
+}
+
+/* =========================================================
+   ⑨ 4단계: 매일 실천 체크 (한 장씩 넘기기 + 평일 5일 인디케이터)
+   ========================================================= */
+const CHALLENGE_DAYS = 5;
+const WEEK_KO = ["일", "월", "화", "수", "목", "금", "토"];
+let flowIdx = null;   // 지금 보고 있는 수칙 번호 (null이면 자동)
+let flowDir = "next"; // 넘김 방향 (애니메이션용)
+let flowBusy = false;
+
+function keyToDate(k) { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); }
+function shortDay(k) { const d = keyToDate(k); return `${d.getMonth() + 1}/${d.getDate()}(${WEEK_KO[d.getDay()]})`; }
+// 학교 가는 날: 월~금 이면서 공휴일·재량휴업일이 아닌 날
+function isSchoolDay(k) {
+  const day = keyToDate(k).getDay();
+  if (day === 0 || day === 6) return false;
+  return !CONFIG.HOLIDAYS.includes(k) && !CONFIG.SCHOOL_OFF_DAYS.includes(k);
+}
+function nextSchoolDay(k, includeSelf) {
+  const d = keyToDate(k);
+  if (!includeSelf) d.setDate(d.getDate() + 1);
+  for (let i = 0; i < 60; i++) {
+    const kk = dateKey(d);
+    if (isSchoolDay(kk)) return kk;
+    d.setDate(d.getDate() + 1);
+  }
+  return k;
+}
+// 시작한 날부터 학교 가는 날 5일
+function challengeDays() {
+  if (!state.startDate) state.startDate = dateKey();
+  const days = [];
+  let k = nextSchoolDay(state.startDate, true);
+  while (days.length < CHALLENGE_DAYS) { days.push(k); k = nextSchoolDay(k, false); }
+  return days;
+}
+
+function todayStats() {
+  const rules = selectedRules();
+  const c = state.checks[dateKey()] || {};
+  const done = rules.filter((r) => c[r.id] === "O").length;
+  const answered = rules.filter((r) => c[r.id]).length;
+  const total = rules.length;
+  return { rules, c, done, answered, total, pct: total ? Math.round((done / total) * 100) : 0 };
+}
+
+function renderIndicator() {
+  const today = dateKey();
+  const days = challengeDays();
+  let n = 0;
+  $("#indSlots").innerHTML = days.map((k) => {
+    const sent = !!state.sent[k];
+    if (sent) n++;
+    const cls = [sent ? "done" : "", k === today ? "today" : "", !sent && k < today ? "missed" : ""].join(" ");
+    const icon = sent ? "✓" : k < today ? "–" : k === today ? "★" : "";
+    return `<div class="slot ${cls}"><div class="dot">${icon}</div><div class="dt">${(() => { const d = keyToDate(k); return `${d.getMonth() + 1}/${d.getDate()}<br>${WEEK_KO[d.getDay()]}요일`; })()}</div></div>`;
+  }).join("");
+  $("#indNum").textContent = n;
+  $("#indFill").style.width = (n / CHALLENGE_DAYS) * 100 + "%";
+  return { days, n };
+}
+
+function renderCheck() {
+  const g = givenName(state.name);
+  const today = dateKey();
+  $("#checkTitle").textContent = `오늘 ${friendlyName(g, "은/는")} 몇 개나 지켰을까?`;
+  $("#clearBox").classList.toggle("ready", !!state.sent[today]);
+  const { days, n } = renderIndicator();
+  const stage = $("#checkStage");
+  const last = days[days.length - 1];
+
+  // 5일이 모두 지났을 때
+  if (today > last) {
+    stage.innerHTML = `
+      <div class="r-wrap">
+        <div class="r-big">${n === CHALLENGE_DAYS ? "🏆" : "🌟"}</div>
+        <p class="r-sub">5일 챌린지가 끝났어요!</p>
+        <p class="r-msg">${CHALLENGE_DAYS}일 중 <b>${n}일</b> 실천을 보냈어요. ${n === CHALLENGE_DAYS ? "모두 해냈어요, 정말 멋져요!" : "끝까지 함께해서 고마워요!"}</p>
+        <button class="btn block" type="button" id="restartBtn">🌱 새로운 5일 다시 시작하기</button>
+      </div>`;
+    $("#restartBtn").addEventListener("click", () => {
+      state.startDate = nextSchoolDay(today, true);
+      flowIdx = null; saveState(); renderCheck();
+      toast("새로운 5일 챌린지를 시작해요! 🌱");
+    });
+    return;
+  }
+  // 주말·공휴일 (또는 아직 시작 전)
+  if (!days.includes(today)) {
+    const next = days.find((k) => k > today) || nextSchoolDay(today, false);
+    stage.innerHTML = `
+      <div class="r-wrap">
+        <div class="r-big">🛌</div>
+        <p class="r-sub">오늘은 쉬는 날이에요</p>
+        <p class="r-msg">주말과 공휴일에는 체크하지 않아요.<br>다음 체크는 <b>${shortDay(next)}</b>에 만나요!</p>
+      </div>`;
+    return;
+  }
+
+  const s = todayStats();
+  if (!s.total) { stage.innerHTML = ""; return; }
+  if (flowIdx === null) {
+    const firstEmpty = s.rules.findIndex((r) => !s.c[r.id]);
+    flowIdx = firstEmpty === -1 ? s.total : firstEmpty;
+  }
+  if (flowIdx >= s.total) renderResult(s); else renderQuestion(s);
+}
+
+function renderQuestion(s) {
+  const r = s.rules[flowIdx];
+  const v = s.c[r.id];
+  const dots = s.rules.map((x, i) => `<i class="${s.c[x.id] === "O" ? "o" : s.c[x.id] === "X" ? "x" : ""} ${i === flowIdx ? "cur" : ""}"></i>`).join("");
+  $("#checkStage").innerHTML = `
+    <div class="q-top">
+      <button type="button" class="q-prev" id="qPrev" ${flowIdx === 0 ? "disabled" : ""}>◀ 이전</button>
+      <span class="q-count"><b>${flowIdx + 1}</b> / ${s.total}</span>
+      <span style="width:72px"></span>
+    </div>
+    <div class="q-dots" aria-hidden="true">${dots}</div>
+    <div class="slide-${flowDir}">
+      <div class="q-card theme-${r.cat.theme}">
+        <span class="q-cat">${r.cat.emoji} ${esc(r.cat.title)}</span>
+        <div class="q-text">${esc(r.text)}</div>
+      </div>
+      <p class="q-ask">오늘 이 약속을 지켰나요?</p>
+      <div class="q-btns">
+        <button type="button" class="q-o ${v === "O" ? "on" : ""}" id="qO" aria-pressed="${v === "O"}"><span class="mk">O</span>지켰어요</button>
+        <button type="button" class="q-x ${v === "X" ? "on" : ""}" id="qX" aria-pressed="${v === "X"}"><span class="mk">X</span>못 지켰어요</button>
+      </div>
+    </div>`;
+  $("#qO").addEventListener("click", () => answer(r.id, "O"));
+  $("#qX").addEventListener("click", () => answer(r.id, "X"));
+  $("#qPrev").addEventListener("click", () => { if (flowIdx > 0) { flowIdx--; flowDir = "prev"; renderCheck(); } });
+}
+
+function answer(id, val) {
+  if (flowBusy) return;
+  flowBusy = true;
+  const today = dateKey();
+  state.checks[today] = state.checks[today] || {};
+  state.checks[today][id] = val;
+  saveState();
+  // 누른 버튼을 잠깐 보여 준 뒤 다음 장으로
+  $("#qO").classList.toggle("on", val === "O");
+  $("#qX").classList.toggle("on", val === "X");
+  setTimeout(() => { flowIdx++; flowDir = "next"; flowBusy = false; renderCheck(); }, 260);
+}
+
+function renderResult(s) {
+  const today = dateKey();
+  const sent = state.sent[today];
+  const msg = s.pct === 100 ? "와! 오늘 약속을 모두 지켰어요 🏆"
+            : s.pct >= 60 ? "아주 잘하고 있어요 👍"
+            : s.done > 0 ? "조금씩 해내고 있어요 🌱"
+            : "내일은 하나라도 꼭 지켜 봐요 💪";
+  $("#checkStage").innerHTML = `
+    <div class="r-wrap slide-next">
+      <div class="r-circle" style="--p:${s.pct}"><div class="in">${s.pct}%<small>오늘 실천률</small></div></div>
+      <p class="r-sub">${s.total}개 중 ${s.done}개 지켰어요</p>
+      <p class="r-msg">${msg}</p>
+      ${sent ? `<div class="r-sent">✅ 오늘 선생님께 보냈어요 (${sent.time.slice(0, 5)})</div>` : ""}
+      <button class="btn block ${sent ? "ghost" : "pink"}" type="button" id="sendBtn">${sent ? "🔁 바뀐 내용 다시 보내기" : "💌 선생님께 보내기"}</button>
+      <button class="btn block ghost" type="button" id="redoBtn">✏️ 처음부터 다시 체크하기</button>
+    </div>`;
+  $("#sendBtn").addEventListener("click", sendToTeacher);
+  $("#redoBtn").addEventListener("click", () => { flowIdx = 0; flowDir = "prev"; renderCheck(); });
+}
+
+/* =========================================================
+   ⑩ 선생님께 보내기 (Google Apps Script로 전송)
+   - 개인정보 보호: 이름과 오늘 실천 수/전체 수만 보내요 (수칙 내용은 보내지 않아요)
+   ========================================================= */
+async function sendToTeacher() {
+  const today = dateKey();
+  const s = todayStats();
+  if (s.answered < s.total) { toast(`아직 체크하지 않은 수칙이 ${s.total - s.answered}개 있어요!`); return; }
+  if (!CONFIG.GAS_URL || CONFIG.GAS_URL.includes("여기에")) {
+    alert("선생님께: index.html 의 CONFIG.GAS_URL 에 구글 앱스 스크립트 웹앱 주소를 넣어 주세요.");
+    return;
+  }
+  const now = new Date();
+  const payload = { name: state.name, date: today, done: s.done, total: s.total, clientTime: `${today} ${timeStr(now)}` };
+
+  const btn = $("#sendBtn");
+  btn.disabled = true;
+  btn.textContent = "📮 보내는 중...";
+  try {
+    // text/plain + no-cors: 구글 앱스 스크립트로 보낼 때 CORS 문제를 피하는 방법
+    await fetch(CONFIG.GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    state.sent[today] = { time: timeStr(now), done: s.done, total: s.total };
+    saveState();
+    renderCheck();
+    celebrate(s.done, s.total);
+  } catch (e) {
+    console.error(e);
+    toast("보내지 못했어요 😢 인터넷 연결을 확인하고 다시 눌러 주세요.");
+    btn.disabled = false;
+    btn.textContent = "💌 선생님께 보내기";
+  }
+}
+
+function openClearModal() {
+  const today = dateKey();
+  let warn = "";
+  if (state.cardMade && !state.sent[today]) warn = "⚠️ 오늘 기록을 아직 선생님께 보내지 않았어요!";
+  $("#clearWarn").textContent = warn;
+  $("#clearModal").classList.remove("hidden");
+  $("#clearNo").focus();
+}
+function closeClearModal() { $("#clearModal").classList.add("hidden"); }
+
+function celebrate(done, total) {
+  const layer = document.createElement("div");
+  layer.className = "celebrate";
+  const g = givenName(state.name);
+  layer.innerHTML = `<div class="msg"><div class="big">💌</div><h3>선생님께 잘 보냈어요!</h3><div>${esc(friendlyName(g, "아/야"))}, 오늘 ${done}/${total}개 실천! 내일도 화이팅 💪</div></div>`;
+  const pieces = ["🌼", "⭐", "💚", "🫧", "🍀", "💛", "🩵"];
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement("span");
+    p.className = "piece";
+    p.textContent = pieces[i % pieces.length];
+    p.style.left = Math.random() * 100 + "vw";
+    p.style.animationDuration = 1.8 + Math.random() * 1.6 + "s";
+    p.style.animationDelay = Math.random() * 0.5 + "s";
+    layer.appendChild(p);
+  }
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 3200);
+}
+
+/* =========================================================
+   ⑪ 이벤트 연결 & 시작
+   ========================================================= */
+function init() {
+  loadState();
+  $("#nameInput").value = state.name || "";
+  updateNamePreview();
+  renderRules();
+
+  if (state.cardMade && state.name && selectedRules().length) {
+    renderCard();
+    renderCheck();
+    $("#step3").classList.remove("hidden");
+    $("#step4").classList.remove("hidden");
+  }
+
+  $("#nameInput").addEventListener("input", updateNamePreview);
+  $("#addCustomBtn").addEventListener("click", addCustom);
+  $("#customInput").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); addCustom(); } });
+  $("#makeCardBtn").addEventListener("click", makeCard);
+  $("#designPick").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-id]");
+    if (!b) return;
+    state.design = b.dataset.id; saveState(); renderCard(); updateNamePreview();
+  });
+  $("#mascotPick").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-m]");
+    if (!b) return;
+    state.mascot = b.dataset.m; saveState(); renderCard();
+  });
+  $("#downloadBtn").addEventListener("click", downloadCard);
+  $("#editBtn").addEventListener("click", () => $("#step2").scrollIntoView({ behavior: "smooth" }));
+  $("#closeModal").addEventListener("click", () => $("#imgModal").classList.add("hidden"));
+  $("#imgModal").addEventListener("click", (e) => { if (e.target.id === "imgModal") e.target.classList.add("hidden"); });
+  // 기록 지우기: 항상 확인 창을 한 번 더 띄워요
+  $("#resetBtn").addEventListener("click", openClearModal);
+  $("#clearBtn").addEventListener("click", openClearModal);
+  $("#clearNo").addEventListener("click", closeClearModal);
+  $("#clearModal").addEventListener("click", (e) => { if (e.target.id === "clearModal") closeClearModal(); });
+  $("#clearYes").addEventListener("click", () => {
+    try { localStorage.removeItem(CONFIG.STORAGE_KEY); } catch (e) {}
+    location.reload();
+  });
+  // 자정이 지나 다시 화면을 켰을 때 '오늘' 갱신
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && state.cardMade) renderCheck(); });
+}
+init();
+
+/* =========================================================
+   ⑫ PWA: 서비스 워커 등록 + 설치 버튼
+   ========================================================= */
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch((err) => console.warn("SW 등록 실패:", err));
+  });
+}
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $("#installBtn").classList.remove("hidden");
+});
+$("#installBtn").addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  $("#installBtn").classList.add("hidden");
+});
+window.addEventListener("appinstalled", () => toast("바탕화면에 설치됐어요! 📲"));
+</script>
+</body>
+</html>
