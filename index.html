@@ -382,6 +382,92 @@ button{font-family:inherit;cursor:pointer}
 .r-big{font-size:64px;line-height:1;margin:8px 0}
 .r-wrap .btn{margin-top:10px}
 
+/* ===== 5단계: 임무완수 상장 (스티커북 일러스트 느낌) ===== */
+.cert-stage{display:flex;justify-content:center;margin:6px 0 4px}
+.cert{
+  position:relative;width:100%;max-width:440px;border-radius:34px;padding:14px;overflow:hidden;
+  background:
+    radial-gradient(circle, #FFD86B 3px, transparent 4px) 0 0/22px 22px,
+    #FFF1B8;
+  box-shadow:0 12px 28px rgba(229,168,0,.22);
+}
+.cert-inner{
+  position:relative;overflow:hidden;border-radius:26px;padding:20px 18px 40px;text-align:center;
+  background:linear-gradient(180deg,#EAF6FF 0%,#FFFDF7 42%,#FFFDF7 78%,#E9FAF3 100%);
+  border:4px dashed #FFC94D;
+}
+/* 하늘 구름 · 반짝이 */
+.cert-cloud{position:absolute;background:#fff;border-radius:999px;opacity:.95}
+.cert-cloud::before,.cert-cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cert-cloud.c1{top:20px;left:-10px;width:86px;height:26px}
+.cert-cloud.c1::before{width:36px;height:36px;left:16px;top:-18px}
+.cert-cloud.c1::after{width:26px;height:26px;left:44px;top:-10px}
+.cert-cloud.c2{top:46px;right:-14px;width:96px;height:28px}
+.cert-cloud.c2::before{width:40px;height:40px;left:22px;top:-20px}
+.cert-cloud.c2::after{width:28px;height:28px;left:54px;top:-12px}
+.cert-deco{position:absolute;font-size:22px;line-height:1}
+/* 리본 제목 */
+.cert-ribbon{position:relative;display:inline-block;margin:6px auto 0;z-index:1}
+.cert-ribbon .rb{
+  position:relative;z-index:2;display:inline-block;background:#FF8FAB;color:#fff;
+  font-family:var(--font-title);font-weight:400;font-size:30px;letter-spacing:3px;
+  padding:8px 26px 6px;border-radius:14px;box-shadow:0 4px 0 #E2668A;
+}
+.cert-ribbon .tail{position:absolute;top:14px;width:34px;height:34px;background:#F27397;z-index:1;border-radius:6px}
+.cert-ribbon .tail.l{left:-22px;transform:rotate(-12deg)}
+.cert-ribbon .tail.r{right:-22px;transform:rotate(12deg)}
+.cert-sub{position:relative;z-index:1;font-size:14px;color:#6E7D88;margin:10px 0 6px}
+/* 수호 친구 캐릭터 */
+.cert-hero{position:relative;width:132px;height:132px;margin:4px auto 6px;z-index:1}
+.cert-hero .halo{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 50% 45%,#FFFFFF 0 52%,#FFF3B8 53% 70%,#FFE08A 71% 100%);
+  box-shadow:0 6px 0 #F5C445;
+}
+.cert-hero .face{position:absolute;inset:0;display:grid;place-items:center;font-size:72px;line-height:1}
+.cert-hero .shield{
+  position:absolute;right:-8px;bottom:-4px;width:50px;height:50px;border-radius:50%;
+  background:#3FBF9C;border:4px solid #fff;display:grid;place-items:center;font-size:24px;
+  box-shadow:0 3px 0 rgba(0,0,0,.08);
+}
+.cert-hero .medal{position:absolute;left:-10px;top:-6px;font-size:38px;transform:rotate(-14deg)}
+/* 이름 */
+.cert-name{position:relative;z-index:1;margin:6px 0 10px}
+.cert-name span{
+  display:inline-block;background:#fff;border:3px solid #3E9BE0;border-radius:999px;
+  padding:4px 26px 2px;font-family:var(--font-title);font-weight:400;font-size:28px;color:#2B3A44;
+  box-shadow:0 4px 0 #BFE0FA;
+}
+.cert-name small{font-size:16px;color:#6E7D88;margin-left:4px}
+.cert-body{position:relative;z-index:1;font-size:16px;line-height:1.7;color:#2B3A44;word-break:keep-all;margin:0 0 12px}
+.cert-body b{color:#E2668A}
+/* 기간 · 실천률 스티커 */
+.cert-info{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+.cert-info div{
+  border-radius:20px;padding:8px 6px 7px;font-size:13px;color:#56656F;
+  box-shadow:0 4px 0 rgba(0,0,0,.06);
+}
+.cert-info .i1{background:#D4ECFF;transform:rotate(-2deg)}
+.cert-info .i2{background:#C9F2E6;transform:rotate(2deg)}
+.cert-info b{display:block;font-family:var(--font-title);font-weight:400;font-size:20px;color:#2B3A44;margin-top:1px}
+/* 하단: 날짜 + 도장 */
+.cert-foot{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:0 4px}
+.cert-foot .date{font-size:13.5px;color:#6E7D88;text-align:left;line-height:1.5}
+.cert-foot .date b{display:block;font-family:var(--font-title);font-weight:400;font-size:17px;color:#2B3A44}
+.cert-stamp{
+  width:84px;height:84px;border-radius:50%;border:3px solid #F06A90;color:#F06A90;
+  display:grid;place-items:center;text-align:center;transform:rotate(-12deg);background:rgba(255,221,230,.55);
+  font-family:var(--font-title);font-weight:400;font-size:14px;line-height:1.2;
+}
+.cert-stamp b{display:block;font-size:16px;font-weight:400;letter-spacing:-.5px}
+.cert-show{
+  position:relative;z-index:1;margin-top:14px;background:#FFDDE6;color:#B23A5E;border-radius:18px;
+  padding:9px 12px;font-family:var(--font-title);font-weight:400;font-size:17px;border:2px dashed #F06A90;
+}
+/* 아래 풀밭 */
+.cert-grass{position:absolute;left:0;right:0;bottom:0;height:30px;background:
+  radial-gradient(circle at 10px 30px,#A8E6CF 14px,transparent 15px) 0 0/28px 30px repeat-x;opacity:.6}
+
 .rule .text,.check-item .ct,.card-sec li,.h-move .tx,.l-list li{color:#2B3A44}
 b,strong{font-weight:400}
 .foot-note{text-align:center;color:var(--ink-soft);font-size:13px;margin-top:26px}
@@ -481,7 +567,7 @@ b,strong{font-weight:400}
         <input id="customInput" type="text" maxlength="60" placeholder="예) 반려견과 논 뒤에는 손 씻기" aria-label="나만의 수칙 입력">
         <button id="addCustomBtn" class="btn pink small" type="button">➕ 추가</button>
       </div>
-      <p class="privacy-note">🔒 알레르기 종류나 병 이름 같은 <b>건강 정보는 적지 않아요.</b><br>나만의 수칙은 내 카드에만 나오고, 선생님께는 <b>"나만의 수칙 1"</b>처럼 번호만 보내져요.</p>
+      <p class="privacy-note">🔒 알레르기 종류나 병 이름 같은 <b>건강 정보는 적지 않아요.</b><br>나만의 수칙은 내 카드에만 나오고, <b>어디에도 보내지 않아요.</b></p>
       <div class="custom-list" id="customList"></div>
     </div>
 
@@ -526,8 +612,22 @@ b,strong{font-weight:400}
     <div id="checkStage"></div>
 
     <div class="clear-box" id="clearBox">
-      <p>🧹 친구와 태블릿을 함께 쓰나요? 다 보냈으면 내 기록을 지워 주세요.</p>
+      <p>🧹 친구와 태블릿을 함께 쓰나요? 챌린지를 마치고 상장을 보여 드렸으면 내 기록을 지워 주세요.</p>
       <button id="clearBtn" class="btn block ghost" type="button">🧹 이 기기에서 내 기록 지우기</button>
+    </div>
+  </section>
+
+  <!-- ===== 5단계: 임무완수 상장 (5일 챌린지 완수 시) ===== -->
+  <section class="panel hidden" id="step5">
+    <div class="step-head">
+      <div class="step-num" style="background:var(--yellow-d)">5</div>
+      <div><h2>임무완수 상장</h2><small>5일 실천 챌린지를 끝까지 해냈어요!</small></div>
+    </div>
+    <div class="cert-stage">
+      <div class="cert" id="certificate"></div>
+    </div>
+    <div class="btn-row">
+      <button id="certDownloadBtn" class="btn sky" type="button">📥 상장 저장하기</button>
     </div>
   </section>
 
@@ -557,7 +657,7 @@ b,strong{font-weight:400}
 <!-- 카드 이미지 미리보기 (아이패드/아이폰은 길게 눌러 저장) -->
 <div class="modal hidden" id="imgModal">
   <div class="modal-box">
-    <h3>🎉 카드 이미지가 준비됐어요</h3>
+    <h3 id="imgModalTitle">🎉 카드 이미지가 준비됐어요</h3>
     <img id="cardImg" alt="나의 알레르기 예방 약속 카드">
     <div class="btn-row">
       <a id="saveLink" class="btn sky" download="약속카드.png" style="text-decoration:none">💾 저장하기</a>
@@ -569,11 +669,13 @@ b,strong{font-weight:400}
 
 <script>
 /* =========================================================
-   ① 설정: 구글 앱스 스크립트 웹앱 URL을 여기에 붙여 넣으세요
+   ① 설정
+   - 이 웹앱은 어떤 정보도 서버로 보내지 않아요. 모든 기록은 이 기기에만 저장돼요.
    ========================================================= */
 const CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbw0Ghmkz7nYP-8kMsSwqGP-UMCfmQMTdOxRQfnmYcUW8xqRyrvWac6p7rFpyzzbzY8/exec",
   STORAGE_KEY: "allergyPromiseCard_v1",
+  // 임무완수 상장 아래쪽에 들어갈 이름 (예: "○○초등학교 보건실")
+  CERT_FROM: "보건실",
 
   // 공휴일 (주말이 아닌 날만 적으면 돼요). 5일 챌린지에서 건너뛰어요.
   HOLIDAYS: [
@@ -1017,31 +1119,44 @@ function renderCard() {
     </div>`;
 }
 
-async function downloadCard() {
+// 화면의 카드·상장을 그림(PNG)으로 만들어 저장 창을 띄워요
+async function saveAsImage({ el, btn, btnText, fileName, title, alt }) {
   if (typeof html2canvas === "undefined") { toast("인터넷 연결을 확인해 주세요 🌐"); return; }
-  const btn = $("#downloadBtn");
   btn.disabled = true;
   btn.textContent = "⏳ 그리는 중...";
   try {
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
-    const cardEl = $("#promiseCard");
-    cardEl.classList.add("capturing");
+    el.classList.add("capturing");
     let canvas;
-    try { canvas = await html2canvas(cardEl, { scale: 2, backgroundColor: null, useCORS: true }); }
-    finally { cardEl.classList.remove("capturing"); }
+    try { canvas = await html2canvas(el, { scale: 2, backgroundColor: null, useCORS: true }); }
+    finally { el.classList.remove("capturing"); }
     const url = canvas.toDataURL("image/png");
+    $("#imgModalTitle").textContent = title;
     $("#cardImg").src = url;
+    $("#cardImg").alt = alt;
     const link = $("#saveLink");
     link.href = url;
-    link.download = `${cardTitle(state.name).replace(/\s+/g, "_")}.png`;
+    link.download = `${fileName.replace(/\s+/g, "_")}.png`;
     $("#imgModal").classList.remove("hidden");
   } catch (e) {
     console.error(e);
     toast("이미지를 만들지 못했어요. 화면을 캡처해 주세요 📸");
   } finally {
     btn.disabled = false;
-    btn.textContent = "📥 카드 다운로드";
+    btn.textContent = btnText;
   }
+}
+function downloadCard() {
+  return saveAsImage({
+    el: $("#promiseCard"), btn: $("#downloadBtn"), btnText: "📥 카드 다운로드",
+    fileName: cardTitle(state.name), title: "🎉 카드 이미지가 준비됐어요", alt: "나의 알레르기 예방 약속 카드"
+  });
+}
+function downloadCertificate() {
+  return saveAsImage({
+    el: $("#certificate"), btn: $("#certDownloadBtn"), btnText: "📥 상장 저장하기",
+    fileName: `${state.name}_임무완수_상장`, title: "🏅 상장 이미지가 준비됐어요", alt: "알레르기 예방 임무완수 상장"
+  });
 }
 
 /* =========================================================
@@ -1114,17 +1229,23 @@ function renderCheck() {
   const stage = $("#checkStage");
   const last = days[days.length - 1];
 
+  renderCertificate(days, n);
+
   // 5일이 모두 지났을 때
   if (today > last) {
+    const earned = n === CHALLENGE_DAYS;
     stage.innerHTML = `
       <div class="r-wrap">
-        <div class="r-big">${n === CHALLENGE_DAYS ? "🏆" : "🌟"}</div>
+        <div class="r-big">${earned ? "🏅" : "🌟"}</div>
         <p class="r-sub">5일 챌린지가 끝났어요!</p>
-        <p class="r-msg">${CHALLENGE_DAYS}일 중 <b>${n}일</b> 실천을 보냈어요. ${n === CHALLENGE_DAYS ? "모두 해냈어요, 정말 멋져요!" : "끝까지 함께해서 고마워요!"}</p>
-        <button class="btn block" type="button" id="restartBtn">🌱 새로운 5일 다시 시작하기</button>
+        <p class="r-msg">${CHALLENGE_DAYS}일 중 <b>${n}일</b> 실천 체크를 했어요. ${earned ? "모두 해냈어요! 임무완수 상장을 보건 선생님께 보여주세요." : "끝까지 함께해서 고마워요! 다시 도전하면 상장을 받을 수 있어요."}</p>
+        ${earned ? `<button class="btn block pink" type="button" id="goCertBtn">🏅 임무완수 상장 보기</button>` : ""}
+        <button class="btn block ${earned ? "ghost" : ""}" type="button" id="restartBtn">🌱 새로운 5일 다시 시작하기</button>
       </div>`;
+    if (earned) $("#goCertBtn").addEventListener("click", () => $("#step5").scrollIntoView({ behavior: "smooth", block: "start" }));
     $("#restartBtn").addEventListener("click", () => {
       state.startDate = nextSchoolDay(today, true);
+      state.sent = {};
       flowIdx = null; saveState(); renderCheck();
       toast("새로운 5일 챌린지를 시작해요! 🌱");
     });
@@ -1193,7 +1314,16 @@ function answer(id, val) {
 
 function renderResult(s) {
   const today = dateKey();
-  const sent = state.sent[today];
+  // 오늘 수칙을 모두 체크하면 오늘 기록이 자동으로 완료돼요 (기기 안에만 저장)
+  // ※ state.sent 는 '그날 체크를 마친 기록'이에요. 서버로 보내지 않아요.
+  if (s.answered < s.total) { flowIdx = s.rules.findIndex((r) => !s.c[r.id]); renderQuestion(s); return; }
+  const firstTime = !state.sent[today];
+  state.sent[today] = { time: timeStr(), done: s.done, total: s.total };
+  saveState();
+  const { days, n } = renderIndicator();
+  renderCertificate(days, n);
+  const earned = n === CHALLENGE_DAYS;
+
   const msg = s.pct === 100 ? "와! 오늘 약속을 모두 지켰어요 🏆"
             : s.pct >= 60 ? "아주 잘하고 있어요 👍"
             : s.done > 0 ? "조금씩 해내고 있어요 🌱"
@@ -1203,67 +1333,89 @@ function renderResult(s) {
       <div class="r-circle" style="--p:${s.pct}"><div class="in">${s.pct}%<small>오늘 실천률</small></div></div>
       <p class="r-sub">${s.total}개 중 ${s.done}개 지켰어요</p>
       <p class="r-msg">${msg}</p>
-      ${sent ? `<div class="r-sent">✅ 오늘 선생님께 보냈어요 (${sent.time.slice(0, 5)})</div>` : ""}
-      <button class="btn block ${sent ? "ghost" : "pink"}" type="button" id="sendBtn">${sent ? "🔁 바뀐 내용 다시 보내기" : "💌 선생님께 보내기"}</button>
+      <div class="r-sent">✅ 오늘 체크 완료! (${n} / ${CHALLENGE_DAYS}일)</div>
+      ${earned ? `<button class="btn block pink" type="button" id="goCertBtn">🏅 임무완수 상장 보기</button>` : ""}
       <button class="btn block ghost" type="button" id="redoBtn">✏️ 처음부터 다시 체크하기</button>
     </div>`;
-  $("#sendBtn").addEventListener("click", sendToTeacher);
+  if (earned) $("#goCertBtn").addEventListener("click", () => $("#step5").scrollIntoView({ behavior: "smooth", block: "start" }));
   $("#redoBtn").addEventListener("click", () => { flowIdx = 0; flowDir = "prev"; renderCheck(); });
+
+  if (firstTime) {
+    if (earned) {
+      celebrate("🏅", "임무완수!", "5일 챌린지를 모두 해냈어요! 상장을 보건 선생님께 보여주세요");
+      setTimeout(() => $("#step5").scrollIntoView({ behavior: "smooth", block: "start" }), 1200);
+    } else {
+      celebrate("🌱", "오늘 체크 완료!", `오늘 ${s.done}/${s.total}개 실천! 내일도 화이팅 💪`);
+    }
+  }
 }
 
 /* =========================================================
-   ⑩ 선생님께 보내기 (Google Apps Script로 전송)
-   - 개인정보 보호: 이름과 오늘 실천 수/전체 수만 보내요 (수칙 내용은 보내지 않아요)
+   ⑩ 임무완수 상장 (5일 체크를 모두 마치면 나타나요)
+   - 서버로 아무것도 보내지 않아요. 학생이 화면(또는 저장한 그림)을 보건 선생님께 보여줘요.
    ========================================================= */
-async function sendToTeacher() {
-  const today = dateKey();
-  const s = todayStats();
-  if (s.answered < s.total) { toast(`아직 체크하지 않은 수칙이 ${s.total - s.answered}개 있어요!`); return; }
-  if (!CONFIG.GAS_URL || CONFIG.GAS_URL.includes("여기에")) {
-    alert("선생님께: index.html 의 CONFIG.GAS_URL 에 구글 앱스 스크립트 웹앱 주소를 넣어 주세요.");
-    return;
-  }
-  const now = new Date();
-  const payload = { name: state.name, date: today, done: s.done, total: s.total, clientTime: `${today} ${timeStr(now)}` };
+function renderCertificate(days, n) {
+  const earned = n === CHALLENGE_DAYS;
+  $("#step5").classList.toggle("hidden", !earned);
+  if (!earned) return;
+  const logs = days.map((k) => state.sent[k]).filter(Boolean);
+  const avg = Math.round(logs.reduce((sum, l) => sum + (l.total ? (l.done / l.total) * 100 : 0), 0) / logs.length);
+  const md = (k) => { const d = keyToDate(k); return `${d.getMonth() + 1}/${d.getDate()}`; };
+  const period = `${md(days[0])} ~ ${md(days[days.length - 1])}`;
+  const mascot = state.mascot || "🦊";
+  $("#certificate").innerHTML = `
+    <div class="cert-inner">
+      <span class="cert-cloud c1"></span><span class="cert-cloud c2"></span>
+      <span class="cert-deco" style="top:12px;right:22px">⭐</span>
+      <span class="cert-deco" style="top:96px;left:18px;font-size:18px">✨</span>
+      <span class="cert-deco" style="top:150px;right:20px">🌼</span>
+      <span class="cert-deco" style="top:212px;left:16px;font-size:20px">🫧</span>
+      <span class="cert-deco" style="top:300px;right:16px;font-size:18px">💛</span>
+      <span class="cert-deco" style="bottom:10px;left:22px;font-size:20px;z-index:2">🍀</span>
+      <span class="cert-deco" style="bottom:10px;right:24px;font-size:20px;z-index:2">🌷</span>
 
-  const btn = $("#sendBtn");
-  btn.disabled = true;
-  btn.textContent = "📮 보내는 중...";
-  try {
-    // text/plain + no-cors: 구글 앱스 스크립트로 보낼 때 CORS 문제를 피하는 방법
-    await fetch(CONFIG.GAS_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-    state.sent[today] = { time: timeStr(now), done: s.done, total: s.total };
-    saveState();
-    renderCheck();
-    celebrate(s.done, s.total);
-  } catch (e) {
-    console.error(e);
-    toast("보내지 못했어요 😢 인터넷 연결을 확인하고 다시 눌러 주세요.");
-    btn.disabled = false;
-    btn.textContent = "💌 선생님께 보내기";
-  }
+      <div class="cert-ribbon"><span class="tail l"></span><span class="rb">임무완수 상장</span><span class="tail r"></span></div>
+      <p class="cert-sub">🛡️ 알레르기 예방 5일 실천 챌린지</p>
+
+      <div class="cert-hero">
+        <div class="halo"></div>
+        <div class="face">${mascot}</div>
+        <div class="medal">🏅</div>
+        <div class="shield">🛡️</div>
+      </div>
+
+      <p class="cert-name"><span>${esc(state.name)}</span></p>
+      <p class="cert-body">스스로 정한 알레르기 예방 약속을<br><b>5일 동안 빠짐없이</b> 지키려고 노력한<br>멋진 알레르기 지킴이에게 이 상장을 드려요!</p>
+
+      <div class="cert-info">
+        <div class="i1">📅 챌린지 기간<b>${period}</b></div>
+        <div class="i2">💪 평균 실천률<b>${avg}%</b></div>
+      </div>
+
+      <div class="cert-foot">
+        <div class="date">${fmtDate(keyToDate(days[days.length - 1]))}<b>${esc(CONFIG.CERT_FROM)}</b></div>
+        <div class="cert-stamp"><div>참<b>잘했어요</b></div></div>
+      </div>
+      <div class="cert-show">📢 이 상장을 보건 선생님께 보여주세요!</div>
+      <div class="cert-grass"></div>
+    </div>`;
 }
 
 function openClearModal() {
-  const today = dateKey();
+  const { n } = renderIndicator();
   let warn = "";
-  if (state.cardMade && !state.sent[today]) warn = "⚠️ 오늘 기록을 아직 선생님께 보내지 않았어요!";
+  if (n === CHALLENGE_DAYS) warn = "⚠️ 상장을 보건 선생님께 보여 드렸나요? 지우면 상장도 사라져요!";
   $("#clearWarn").textContent = warn;
   $("#clearModal").classList.remove("hidden");
   $("#clearNo").focus();
 }
 function closeClearModal() { $("#clearModal").classList.add("hidden"); }
 
-function celebrate(done, total) {
+function celebrate(icon, title, text) {
   const layer = document.createElement("div");
   layer.className = "celebrate";
   const g = givenName(state.name);
-  layer.innerHTML = `<div class="msg"><div class="big">💌</div><h3>선생님께 잘 보냈어요!</h3><div>${esc(friendlyName(g, "아/야"))}, 오늘 ${done}/${total}개 실천! 내일도 화이팅 💪</div></div>`;
+  layer.innerHTML = `<div class="msg"><div class="big">${icon}</div><h3>${esc(title)}</h3><div>${esc(friendlyName(g, "아/야"))}, ${esc(text)}</div></div>`;
   const pieces = ["🌼", "⭐", "💚", "🫧", "🍀", "💛", "🩵"];
   for (let i = 0; i < 24; i++) {
     const p = document.createElement("span");
@@ -1309,6 +1461,7 @@ function init() {
     state.mascot = b.dataset.m; saveState(); renderCard();
   });
   $("#downloadBtn").addEventListener("click", downloadCard);
+  $("#certDownloadBtn").addEventListener("click", downloadCertificate);
   $("#editBtn").addEventListener("click", () => $("#step2").scrollIntoView({ behavior: "smooth" }));
   $("#closeModal").addEventListener("click", () => $("#imgModal").classList.add("hidden"));
   $("#imgModal").addEventListener("click", (e) => { if (e.target.id === "imgModal") e.target.classList.add("hidden"); });
